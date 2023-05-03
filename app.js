@@ -24,9 +24,6 @@ app.use((req, res) => {
 });
 
 app.use((err, req, res, next) => {
-  if (err.message.includes("E11000 duplicate key error")) {
-    res.status(409).json({ message: "Email in use" });
-  }
   if (err.name === "ValidationError") {
     res
       .status(400)
