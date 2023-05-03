@@ -6,9 +6,15 @@ const { validateBody } = require("../../middlewares");
 const schemas = require("../../schemas/user");
 
 router.post(
-  "/",
-  validateBody(schemas.registrationSchema),
+  "/register",
+  validateBody(schemas.authSchema),
   ctrlWrapper(controller.registration)
+);
+
+router.post(
+  "/login",
+  validateBody(schemas.authSchema),
+  ctrlWrapper(controller.login)
 );
 
 module.exports = router;
