@@ -1,4 +1,4 @@
-const { Schema, model } = require("mongoose");
+const { Schema, model, Types } = require("mongoose");
 
 const schema = Schema(
   {
@@ -12,6 +12,10 @@ const schema = Schema(
       type: String,
       minLength: [6, "Password should be at least 6 characters long"],
       required: true,
+    },
+    contacts: {
+      type: [Types.ObjectId],
+      ref: "contacts",
     },
   },
   {
