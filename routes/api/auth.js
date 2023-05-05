@@ -1,6 +1,7 @@
 const express = require("express");
 const ctrlWrapper = require("../../helpers/ctrlWrapper");
 const router = express.Router();
+// const ctrlWrapper = require("../../helpers/ctrlWrapper");
 const controller = require("../../controllers/auth");
 const { validateBody } = require("../../middlewares");
 const schemas = require("../../schemas/user");

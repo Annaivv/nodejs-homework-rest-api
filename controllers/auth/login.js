@@ -1,6 +1,8 @@
 const bcrypt = require("bcryptjs");
+const jwt = require("jsonwebtoken");
 const User = require("../../models/user");
 const { HttpError } = require("../../helpers");
+const { JWT_SECRET } = process.env;
 
 const login = async (req, res) => {
   const { email, password } = req.body;
@@ -13,8 +15,10 @@ const login = async (req, res) => {
   if (!isValidPassword) {
     throw HttpError(401, "Email or password is wrong");
   }
+
+  const token = jwt.sign({ id: user._id }, JWT_SECRET, { expiresIn: "1d" });
   res.json({
-    token: "exampletoken",
+    token,
     user: {
       email,
       subscription: "starter",
