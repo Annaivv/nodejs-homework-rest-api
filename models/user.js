@@ -18,11 +18,11 @@ const schema = Schema(
       enum: ["starter", "pro", "business"],
       default: "starter",
     },
-    token: String,
-    contacts: {
-      type: [Types.ObjectId],
-      ref: "contacts",
-    },
+    // token: String,
+    // contacts: {
+    //   type: [Types.ObjectId],
+    //   ref: "contacts",
+    // },
   },
   {
     timestamps: true,

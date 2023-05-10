@@ -1,22 +1,18 @@
 const express = require("express");
-const ctrlWrapper = require("../../helpers/ctrlWrapper");
 const router = express.Router();
 const controller = require("../../controllers/auth");
 const { validateBody } = require("../../middlewares");
 const schemas = require("../../schemas/user");
+const { ctrlWrapper } = require("../../helpers");
 
 router.post(
   "/register",
   validateBody(schemas.authSchema),
-  ctrlWrapper(controller.registration)
+  ctrlWrapper(controller.register)
 );
 
-router.post(
-  "/login",
-  validateBody(schemas.authSchema),
-  ctrlWrapper(controller.login)
-);
+// router.post("/login", validateBody(schemas.authSchema), controller.login);
 
-router.post("/logout", ctrlWrapper(controller.logout));
+// router.post("/logout", controller.logout);
 
 module.exports = router;
