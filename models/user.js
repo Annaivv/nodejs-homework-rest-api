@@ -1,35 +1,48 @@
-const { Schema, model, Types } = require("mongoose");
+const { Schema, model } = require("mongoose");
+const Joi = require("joi");
 
-const schema = Schema(
+const emailRegex = /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/;
+
+const userSchema = new Schema(
   {
-    email: {
-      type: String,
-      unique: true,
-      match: /^\w+@[a-zA-Z_]+?\.[a-zA-Z]{2,3}$/,
-      required: [true, "Email is required"],
-    },
     password: {
       type: String,
-      minLength: [6, "Password should be at least 6 characters long"],
       required: [true, "Set password for user"],
+      minLength: [6, "Password should contain at least 6 symbols"],
+    },
+    email: {
+      type: String,
+      required: [true, "Email is required"],
+      unique: true,
+      match: emailRegex,
     },
     subscription: {
       type: String,
       enum: ["starter", "pro", "business"],
       default: "starter",
     },
-    // token: String,
-    // contacts: {
-    //   type: [Types.ObjectId],
-    //   ref: "contacts",
-    // },
+    token: {
+      type: String,
+      default: "",
+    },
   },
-  {
-    timestamps: true,
-    versionKey: false,
-  }
+  { versionKey: false, timestamps: true }
 );
 
-const User = model("user", schema);
+const authSchema = Joi.object({
+  email: Joi.string()
+    .pattern(emailRegex)
+    .required()
+    .error(new Error("<Помилка від Joi або іншої бібліотеки валідації>")),
+  password: Joi.string().min(6).required().messages({
+    "string.min": `Password should be {#limit} symbols long`,
+    "string.required": "<Помилка від Joi або іншої бібліотеки валідації>",
+  }),
+});
 
-module.exports = User;
+const User = model("user", userSchema);
+
+module.exports = {
+  User,
+  authSchema,
+};
