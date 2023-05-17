@@ -4,15 +4,23 @@ const { HttpError, ctrlWrapper } = require("../helpers");
 const getAll = async (req, res) => {
   const { _id: owner } = req.user;
   const result = await Contact.find({ owner });
+  console.log(result.name);
   res.json(result);
 };
 
 const getById = async (req, res) => {
+  const { _id: owner } = req.user;
   const { id } = req.params;
+
   const result = await Contact.findById(id);
   if (!result) {
     throw HttpError(404, "Not found");
   }
+
+  if (result.owner.toString() !== owner.toString()) {
+    throw HttpError(401);
+  }
+
   res.json(result);
 };
 
