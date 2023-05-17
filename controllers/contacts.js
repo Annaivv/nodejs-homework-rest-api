@@ -31,11 +31,20 @@ const add = async (req, res) => {
 };
 
 const deleteById = async (req, res) => {
+  const { _id: owner } = req.user;
   const { id } = req.params;
-  const result = await Contact.findByIdAndDelete(id);
+
+  const result = await Contact.findById(id);
+
   if (!result) {
     throw HttpError(404, "Not found");
   }
+
+  if (!result.owner || !owner || result.owner.toString() !== owner.toString()) {
+    throw HttpError(401);
+  }
+  await Contact.findByIdAndDelete(id);
+
   res.json({
     message: "contact deleted",
   });
