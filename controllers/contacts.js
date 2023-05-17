@@ -47,13 +47,23 @@ const updateById = async (req, res) => {
       message: "missing fields",
     });
   }
+  const { _id: owner } = req.user;
   const { id } = req.params;
-  const result = await Contact.findByIdAndUpdate(id, req.body, { new: true });
+
+  const result = await Contact.findById(id);
   if (!result) {
     throw HttpError(404, "Not found");
   }
 
-  res.json(result);
+  if (result.owner.toString() !== owner.toString()) {
+    throw HttpError(401);
+  }
+
+  const updateResult = await Contact.findByIdAndUpdate(id, req.body, {
+    new: true,
+  });
+
+  res.json(updateResult);
 };
 
 const updateStatusContact = async (req, res) => {
