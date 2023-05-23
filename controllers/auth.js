@@ -4,7 +4,8 @@ const gravatar = require("gravatar");
 const path = require("path");
 const fs = require("fs/promises");
 const Jimp = require("jimp");
-const { ctrlWrapper, HttpError } = require("../helpers");
+const { v4 } = require("uuid");
+const { ctrlWrapper, HttpError, sendMail } = require("../helpers");
 const { User } = require("../models/user");
 
 const { JWT_SECRET } = process.env;
@@ -13,6 +14,7 @@ const avatarsDir = path.join(__dirname, "../", "public", "avatars");
 
 const register = async (req, res) => {
   const { email, password } = req.body;
+  const verificationToken = v4();
   const user = await User.findOne({ email });
 
   if (user) {
@@ -26,6 +28,13 @@ const register = async (req, res) => {
     ...req.body,
     password: hashPassword,
     avatarURL,
+    verificationToken,
+  });
+
+  await sendMail({
+    to: email,
+    subject: "Please confirm your email",
+    html: `<a href="http://localhost:3000/api/users/verify/${verificationToken}">Confirm your email</a>`,
   });
 
   res.status(201).json({
@@ -42,6 +51,10 @@ const login = async (req, res) => {
   if (!user) {
     throw HttpError(401, "Email or password is wrong");
   }
+  if (!user.verify) {
+    throw HttpError(401, "Email is not confirmed");
+  }
+
   const passwordCompare = await bcrypt.compare(password, user.password);
   if (!passwordCompare) {
     throw HttpError(401, "Email or password is wrong");
@@ -97,10 +110,29 @@ const updateAvatar = async (req, res) => {
   });
 };
 
+const verifyEmail = async (req, res) => {
+  const { verificationToken } = req.params;
+  const user = await User.findOne({ verificationToken });
+
+  if (!user) {
+    throw HttpError(404, "User not found");
+  }
+
+  await User.findByIdAndUpdate(user._id, {
+    verify: true,
+    verificationToken: null,
+  });
+
+  return res.json({
+    message: "Verification successful",
+  });
+};
+
 module.exports = {
   register: ctrlWrapper(register),
   login: ctrlWrapper(login),
   getCurrent: ctrlWrapper(getCurrent),
   logout: ctrlWrapper(logout),
   updateAvatar: ctrlWrapper(updateAvatar),
+  verifyEmail: ctrlWrapper(verifyEmail),
 };
