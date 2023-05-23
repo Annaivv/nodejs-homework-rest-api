@@ -128,6 +128,33 @@ const verifyEmail = async (req, res) => {
   });
 };
 
+const resendVerification = async (req, res) => {
+  const { email } = req.body;
+  const user = await User.findOne({ email });
+
+  if (!email) {
+    throw HttpError(400, "missing required field email");
+  }
+
+  if (!user) {
+    throw HttpError(404, "User not found");
+  }
+
+  if (user.verify) {
+    throw HttpError(400, "Verification has already been passed");
+  }
+
+  await sendMail({
+    to: email,
+    subject: "Please confirm your email",
+    html: `<a href="http://localhost:3000/api/users/verify/${user.verificationToken}">Confirm your email</a>`,
+  });
+
+  res.json({
+    message: "Verification email sent",
+  });
+};
+
 module.exports = {
   register: ctrlWrapper(register),
   login: ctrlWrapper(login),
@@ -135,4 +162,5 @@ module.exports = {
   logout: ctrlWrapper(logout),
   updateAvatar: ctrlWrapper(updateAvatar),
   verifyEmail: ctrlWrapper(verifyEmail),
+  resendVerification: ctrlWrapper(resendVerification),
 };
